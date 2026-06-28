@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mariachi App</title>
+
+  <!-- Vinculación con hoja de estilos externa -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<style>
+  @media (max-width: 768px) {
+    .logo-login-img {
+      width: 180px !important;
+      margin: 0 auto 40px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .logo-login-img {
+      width: 180px !important;
+      margin: 0 auto 40px !important;
+    }
+  }
+</style>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       LOGIN OVERLAY — Pantalla de autenticación
+       Se muestra solo si no hay token válido
+  ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="loginOverlay">
+    <!-- Logo AFUERA y ARRIBA del modal -->
+    <img src="logomariachi.png" alt="Logo Mariachi" class="logo-login-img" style="display: block; width: 180px; height: auto; margin: 0 auto 40px; border-radius: 6px;" onerror="this.style.display='none'" />
+    
+    <div class="modal" id="loginModal">
+      <h2>Acceso a la Agenda</h2>
+      <p class="aviso">Selecciona tu tipo de acceso e ingresa la contraseña o código</p>
+
+      <!-- Tabs para cambiar entre ADMIN e INTEGRANTE -->
+      <div class="login-tabs">
+        <button class="login-tab active" onclick="cambiarTab('admin')">
+          Acceso Admin
+        </button>
+        <button class="login-tab" onclick="cambiarTab('integrante')">
+          Acceso Integrante
+        </button>
+      </div>
+
+      <!-- FORMULARIO ADMIN -->
+      <form id="formLoginAdmin" class="login-form active" style="display: block;">
+        <div class="form-grupo">
+          <label for="passwordAdmin">Contraseña Admin</label>
+          <input 
+            type="password" 
+            id="passwordAdmin" 
+            placeholder="Ingresa contraseña" 
+            required 
+          />
+        </div>
+        <button type="submit" class="btn btn-primario">Entrar como Admin</button>
+      </form>
+
+      <!-- FORMULARIO INTEGRANTE -->
+      <form id="formLoginIntegrante" class="login-form" style="display: none;">
+        <div class="form-grupo">
+          <label for="codigoIntegrante">Código de Integrante</label>
+          <input 
+            type="password" 
+            id="codigoIntegrante" 
+            placeholder="Ingresa código" 
+            required 
+          />
+        </div>
+        <button type="submit" class="btn btn-primario">Entrar como Integrante</button>
+      </form>
+
+      <!-- Mensaje de error (oculto por defecto) -->
+      <div id="mensajeError" class="mensaje-error oculto"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       HEADER — Encabezado principal de la app
+       Se muestra solo después de autenticarse
+  ═══════════════════════════════════════════ -->
+  <header class="header" id="header" style="display: none;">
+    <img id="logo" src="logomariachi.png" alt="Logo Mariachi" onerror="this.style.display='none'" />
+    <div class="header-textos">
+      <h1>Mariachi Santa Cecilia</h1>
+      <h2>Agenda y administración de Eventos</h2>
+    </div>
+    
+    <!-- Botón cerrar sesión (nuevo) -->
+    <button id="btnCerrarSesion" class="btn-cerrar-sesion">
+      Cerrar sesión
+    </button>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN FORMULARIO — Colapsable
+       Sirve tanto para crear como para editar
+       SOLO VISIBLE PARA ADMIN
+  ═══════════════════════════════════════════ -->
+  <section class="seccion-formulario" id="seccionFormulario" style="display: none;">
+
+    <!-- Botón que abre y cierra el formulario -->
+    <div class="seccion-botones-principales">
+      <button id="btnToggleForm" class="btn btn-primario">+ Agregar nuevo evento</button>
+      <a href="contrato_mariachiSC.pdf" download class="btn btn-secundario">Descargar contrato para llenar</a>
+    </div>
+
+    <!-- Formulario oculto por defecto -->
+    <div id="contenedorForm" class="form-contenedor oculto">
+      <h2 id="tituloForm">Nuevo Evento</h2>
+
+      <form id="formEvento" class="formulario">
+
+        <!-- Fila 1: Fecha y horarios -->
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="fecha_evento">Fecha del evento *</label>
+            <input type="date" id="fecha_evento" name="fecha_evento" required />
+          </div>
+          <div class="form-grupo">
+            <label for="hora_inicio">Hora inicio *</label>
+            <input type="time" id="hora_inicio" name="hora_inicio" required />
+          </div>
+          <div class="form-grupo">
+            <label for="hora_fin">Hora fin *</label>
+            <input type="time" id="hora_fin" name="hora_fin" required />
+          </div>
+          <div class="form-grupo">
+            <label for="lugar">Lugar *</label>
+            <input type="text" id="lugar" name="lugar" placeholder="Colonia, domicilio..." required />
+          </div>
+        </div>
+
+        <!-- Fila 2: Tipo, responsable y estado -->
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="tipo_evento">Tipo de evento *</label>
+            <select id="tipo_evento" name="tipo_evento" required>
+              <option value="">-- Selecciona --</option>
+              <option value="Boda">Boda</option>
+              <option value="Cumpleaños">Cumpleaños</option>
+              <option value="XV años">XV años</option>
+              <option value="Misa">Misa</option>
+              <option value="Serenata">Serenata</option>
+              <option value="Cepelio">Cepelio</option>
+              <option value="Aniversario">Aniversario</option>
+              <option value="Religioso">Evento religioso</option>
+              <option value="Evento especial">Evento especial</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label for="responsable">Responsable *</label>
+            <input type="text" id="responsable" name="responsable" placeholder="Nombre del integrante" required />
+          </div>
+          <div class="form-grupo">
+            <label for="estado">Estado *</label>
+            <select id="estado" name="estado" required>
+              <option value="pendiente">Pendiente</option>
+              <option value="realizado">Realizado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 3: Costo -->
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="costo_total">Costo total</label>
+            <input type="number" id="costo_total" name="costo_total" placeholder="Dejar vacío si no se sabe" min="0" />
+          </div>
+        </div>
+
+        <!-- Fila 4: Fecha registro y notas -->
+        <div class="form-fila">
+          <div class="form-grupo">
+            <label for="fecha_registro">Fecha de registro</label>
+            <input type="date" id="fecha_registro" name="fecha_registro" />
+          </div>
+          <div class="form-grupo form-grupo--ancho">
+            <label for="notas">Notas</label>
+            <textarea id="notas" name="notas" placeholder="Observaciones adicionales..." rows="2"></textarea>
+          </div>
+        </div>
+
+        <!-- Botones del formulario -->
+        <div class="form-acciones">
+          <button type="submit" id="btnGuardar" class="btn btn-primario">Guardar</button>
+          <button type="button" id="btnCancelar" class="btn btn-secundario">Cancelar</button>
+        </div>
+
+      </form>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECCIÓN FILTROS — Encima de la tabla
+  ═══════════════════════════════════════════ -->
+  <section class="seccion-filtros" id="seccionFiltros" style="display: none;">
+    <div class="filtros-contenedor">
+
+      <div class="form-grupo">
+        <label for="filtro_fecha">Fecha</label>
+        <input type="date" id="filtro_fecha" />
+      </div>
+
+      <div class="form-grupo">
+        <label for="filtro_estado">Estado</label>
+        <select id="filtro_estado">
+          <option value="">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="realizado">Realizado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+
+      <div class="form-grupo">
+        <label for="filtro_responsable">Responsable</label>
+        <input type="text" id="filtro_responsable" placeholder="Nombre..." />
+      </div>
+
+      <div class="filtros-botones">
+        <button id="btnFiltrar" class="btn btn-primario">Filtrar</button>
+        <button id="btnVerTodos" class="btn btn-secundario">Ver todos</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+      SECCIÓN TABLA — Lista de eventos
+  ═══════════════════════════════════════════ -->
+  <section class="seccion-tabla" id="seccionTabla" style="display: none;">
+
+    <!-- Contador de resultados -->
+    <p id="contadorResultados" class="contador"></p>
+
+    <!-- Contenedor TARJETAS MÓVIL (nuevo) -->
+    <div class="tarjetas-contenedor" id="tarjetasContenedor"></div>
+
+    <!-- Contenedor TABLA DESKTOP con scroll horizontal -->
+    <div class="tabla-contenedor">
+      <table id="tablaEventos" class="tabla">
+        <thead>
+          <tr>
+            <!-- Columnas fijas (sticky) -->
+            <th class="col-fija">Fecha</th>
+            <th class="col-fija">Hora ini</th>
+            <th class="col-fija">Hora fin</th>
+            <th class="col-fija">Lugar</th>
+            <th class="col-fija">Estado</th>
+            <!-- Columnas con scroll -->
+            <th>Tipo</th>
+            <th>Responsable</th>
+            <th>Costo</th>
+            <th>F. Registro</th>
+            <th>Notas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <!-- El cuerpo de la tabla se llena dinámicamente con app.js -->
+        <tbody id="cuerpoTabla"></tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- Vinculación con archivo JS externo -->
+  <script src="app.js"></script>
+
+</body>
+</html>
