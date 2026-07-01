@@ -23,9 +23,48 @@ mongoose.connect(mongoURL)
   .catch(err => console.error('❌ Error conectando a MongoDB:', err));
 
 // ═══════════════════════════════════════════
-// RUTAS DE EVENTOS
+// MIDDLEWARE: VERIFICAR JWT
+// Valida que el token no esté expirado antes de acceder a eventos
 // ═══════════════════════════════════════════
-app.use('/api/eventos', eventosRouter);
+const verificarToken = async (req, res, next) => {
+  try {
+    // Obtener token del header (formato: "Bearer TOKEN")
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        mensaje: 'Token no proporcionado'
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Leer JWT_SECRET desde la BD
+    const credenciales = await mongoose.connection.collection('credenciales').findOne({ tipo: 'acceso' });
+    if (!credenciales) {
+      return res.status(500).json({
+        success: false,
+        mensaje: 'Error: credenciales no configuradas'
+      });
+    }
+
+    // Verificar y decodificar token
+    const decoded = jwt.verify(token, credenciales.jwt_secret);
+    req.rol = decoded.rol;
+    next();
+
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      mensaje: 'Token inválido o expirado'
+    });
+  }
+};
+
+// ═══════════════════════════════════════════
+// RUTAS DE EVENTOS (PROTEGIDAS CON JWT)
+// ═══════════════════════════════════════════
+app.use('/api/eventos', verificarToken, eventosRouter);
 
 // ═══════════════════════════════════════════
 // NUEVA RUTA: AUTENTICACIÓN (Login)

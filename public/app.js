@@ -292,7 +292,21 @@ document.getElementById('formEvento').addEventListener('submit', async (e) => {
 // ═══════════════════════════════════════════
 async function cargarEventos() {
   try {
-    const response = await fetch('/api/eventos');
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/eventos', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    // Si recibimos 401, token expiró
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      location.reload();
+      return;
+    }
+
     const eventos = await response.json();
 
     // Detectar si estamos en móvil o desktop
@@ -448,7 +462,21 @@ function renderizarTablaDesktop(eventos) {
 // ═══════════════════════════════════════════
 async function editarEvento(id) {
   try {
-    const response = await fetch(`/api/eventos/${id}`);
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/api/eventos/${id}`, {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    // Si recibimos 401, token expiró
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      location.reload();
+      return;
+    }
+
     const evento = await response.json();
 
     // Llenar formulario con datos
@@ -479,7 +507,21 @@ async function eliminarEvento(id) {
   if (!confirm('¿Deseas eliminar este evento?')) return;
 
   try {
-    const response = await fetch(`/api/eventos/${id}`, { method: 'DELETE' });
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/api/eventos/${id}`, { 
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    // Si recibimos 401, token expiró
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      location.reload();
+      return;
+    }
 
     if (response.ok) {
       mostrarToast('Evento eliminado', 'exito');
@@ -510,7 +552,21 @@ document.getElementById('btnFiltrar').addEventListener('click', async () => {
 
     url += params.join('&');
 
-    const response = await fetch(url);
+    const token = localStorage.getItem('token');
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    // Si recibimos 401, token expiró
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      location.reload();
+      return;
+    }
+
     const eventos = await response.json();
 
     // Renderizar según dispositivo

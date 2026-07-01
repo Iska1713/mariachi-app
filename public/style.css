@@ -861,3 +861,29 @@ body {
     font-size: 12px;
   }
 }
+
+/* ═══════════════════════════════════════════
+   FOOTER — Pie de página
+═══════════════════════════════════════════ */
+.footer {
+  background-color: var(--rojo);
+  color: white;
+  text-align: center;
+  padding: 16px 20px;
+  margin-top: 40px;
+  font-size: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+}
