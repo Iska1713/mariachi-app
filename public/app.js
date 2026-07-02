@@ -255,20 +255,29 @@ document.getElementById('formEvento').addEventListener('submit', async (e) => {
   });
 
   try {
+    // Obtener token para las peticiones
+    const token = localStorage.getItem('token');
+    
     let response;
 
     if (eventoEnEdicion) {
-      // EDITAR evento existente
+      // EDITAR evento existente - con Authorization header
       response = await fetch(`/api/eventos/${eventoEnEdicion}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
         body: JSON.stringify(datos)
       });
     } else {
-      // CREAR nuevo evento
+      // CREAR nuevo evento - con Authorization header
       response = await fetch('/api/eventos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
         body: JSON.stringify(datos)
       });
     }
