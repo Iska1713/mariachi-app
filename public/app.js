@@ -289,6 +289,8 @@ document.getElementById('formEvento').addEventListener('submit', async (e) => {
 
 // ═══════════════════════════════════════════
 // Función: Cargar todos los eventos desde API
+// Renderiza AMBAS vistas (tabla + tarjetas)
+// CSS decide cuál mostrar según el ancho
 // ═══════════════════════════════════════════
 async function cargarEventos() {
   try {
@@ -309,16 +311,13 @@ async function cargarEventos() {
 
     const eventos = await response.json();
 
-    // Detectar si estamos en móvil o desktop
-    const esMobil = window.innerWidth < 768;
+    // Renderizar AMBAS vistas con los MISMOS eventos
+    // Tabla para desktop, tarjetas para móvil
+    // CSS media queries deciden cuál mostrar
+    renderizarTablaDesktop(eventos);
+    renderizarTarjetas(eventos);
 
-    if (esMobil) {
-      renderizarTarjetas(eventos);
-    } else {
-      renderizarTablaDesktop(eventos);
-    }
-
-    // Actualizar contador
+    // Actualizar contador de resultados
     document.getElementById('contadorResultados').textContent = `${eventos.length} evento(s) encontrado(s)`;
   } catch (err) {
     mostrarToast('Error cargando eventos: ' + err.message, 'error');
@@ -535,7 +534,8 @@ async function eliminarEvento(id) {
 }
 
 // ═══════════════════════════════════════════
-// Event Listener: Botones de filtro
+// Event Listener: Botón Filtrar
+// Filtra eventos y renderiza AMBAS vistas
 // ═══════════════════════════════════════════
 document.getElementById('btnFiltrar').addEventListener('click', async () => {
   const fecha = document.getElementById('filtro_fecha').value;
@@ -559,7 +559,6 @@ document.getElementById('btnFiltrar').addEventListener('click', async () => {
       }
     });
 
-    // Si recibimos 401, token expiró
     if (response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('rol');
@@ -569,18 +568,33 @@ document.getElementById('btnFiltrar').addEventListener('click', async () => {
 
     const eventos = await response.json();
 
-    // Renderizar según dispositivo
-    const esMobil = window.innerWidth < 768;
-    if (esMobil) {
-      renderizarTarjetas(eventos);
-    } else {
-      renderizarTablaDesktop(eventos);
-    }
+    // Renderizar AMBAS vistas con los eventos filtrados
+    // CSS media queries deciden cuál mostrar
+    renderizarTablaDesktop(eventos);
+    renderizarTarjetas(eventos);
 
     document.getElementById('contadorResultados').textContent = `${eventos.length} evento(s) encontrado(s)`;
   } catch (err) {
     mostrarToast('Error filtrando: ' + err.message, 'error');
   }
+});
+
+// ═══════════════════════════════════════════
+// Event Listener: Botón Limpiar Filtros
+// Borra fecha, estado y responsable
+// ═══════════════════════════════════════════
+document.getElementById('btnLimpiar').addEventListener('click', () => {
+  // Limpiar campo de fecha
+  document.getElementById('filtro_fecha').value = '';
+  
+  // Resetear select de estado a "Todos"
+  document.getElementById('filtro_estado').value = '';
+  
+  // Limpiar campo de responsable
+  document.getElementById('filtro_responsable').value = '';
+  
+  // Mostrar mensaje de confirmación
+  mostrarToast('Filtros limpiados', 'exito');
 });
 
 document.getElementById('btnVerTodos').addEventListener('click', cargarEventos);
@@ -599,14 +613,6 @@ function mostrarToast(mensaje, tipo) {
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
-
-// ═══════════════════════════════════════════
-// Event Listener: Resize
-// Recarga eventos al cambiar tamaño (responsive)
-// ═══════════════════════════════════════════
-window.addEventListener('resize', () => {
-  cargarEventos();
-});
 
 // ═══════════════════════════════════════════
 // AL CARGAR LA PÁGINA
