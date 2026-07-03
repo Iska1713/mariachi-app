@@ -96,12 +96,35 @@ document.getElementById('formLoginIntegrante').addEventListener('submit', (e) =>
 // ═══════════════════════════════════════════
 // Función: Verificar token al cargar la página
 // Si hay token válido, muestra la app sin pedir login
+// NUEVO: Valida expiración client-side (automático 24h)
 // ═══════════════════════════════════════════
 function verificarToken() {
   const token = localStorage.getItem('token');
   const rol = localStorage.getItem('rol');
 
   if (token && rol) {
+    // Decodificar token para verificar expiración
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1])); // Decodificar payload
+      const ahora = Math.floor(Date.now() / 1000); // Hora actual en segundos
+      
+      // Verificar si token ya expiró
+      if (payload.exp < ahora) {
+        // Token expirado: limpiar y mandar al login
+        localStorage.removeItem('token');
+        localStorage.removeItem('rol');
+        location.reload();
+        return;
+      }
+    } catch (err) {
+      // Si no puede decodificar, limpia por seguridad
+      localStorage.removeItem('token');
+      localStorage.removeItem('rol');
+      location.reload();
+      return;
+    }
+
+    // Si token es válido, mostrar app
     tokenActual = token;
     rolActual = rol;
 
@@ -113,6 +136,18 @@ function verificarToken() {
     cargarEventos();
   }
 }
+
+// ═══════════════════════════════════════════
+// Event Listener: Detectar cuando vuelves a la pestaña
+// NUEVO: Verifica token al volver de otra app/pestaña
+// Así detecta si expiró mientras estabas fuera
+// ═══════════════════════════════════════════
+document.addEventListener('visibilitychange', () => {
+  // Si vuelves a la pestaña (era invisible antes)
+  if (!document.hidden) {
+    verificarToken(); // Verifica si el token expiró mientras no miraban
+  }
+});
 
 // ═══════════════════════════════════════════
 // Función: Cerrar sesión
