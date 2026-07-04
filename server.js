@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -16,7 +18,7 @@ app.use(express.static('public'));
 // ═══════════════════════════════════════════
 // CONEXIÓN A MONGODB ATLAS
 // ═══════════════════════════════════════════
-const mongoURL = 'mongodb+srv://mariachi_user:mariachi2026@mariachi-cluster.vo4alil.mongodb.net/gestion_mariachi?appName=mariachi-cluster';
+const mongoURL = process.env.MONGODB_URI;
 
 mongoose.connect(mongoURL)
   .then(() => console.log('✅ Conectado a MongoDB Atlas'))
